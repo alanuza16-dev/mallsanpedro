@@ -1,0 +1,7 @@
+work/site/node_modules/
+work/site/dist/
+work/site/.vinext/
+work/site/.openai/hosting.json
+work/*.png
+work/*.ndjson
+outputs/

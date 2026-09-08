@@ -1,0 +1,3 @@
+import {seed,act,draw,tickets} from './site/lib/tombola.mjs';
+for (const [amount,ordinary,sponsor] of [[9000,0,0],[10000,1,2],[25000,2,4],[40000,4,8]]) { if (tickets(amount,1)!==ordinary || tickets(amount,2)!==sponsor) throw Error('boundary'); }
+let s=seed(); for (const r of s.rows) s=act(s,'review',{id:r.id,status:'Aprobada',reason:'demo'}); s=act(s,'assign'); if (s.ledger.reduce((n,l)=>n+l.count,0)!==11) throw Error('weighted total'); s=act(s,'assign'); if (s.ledger.length!==3) throw Error('re-run'); s=act(s,'close'); s=act(s,'freeze'); s=draw(s); if (!s.result?.ticket) throw Error('draw'); console.log('OK',s.result.ticket);
