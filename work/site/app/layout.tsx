@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Tómbola de diciembre · Demo', description: 'Demostración con datos ficticios: registro, revisión, tickets y sorteo opcional.',
+  title: 'Tómbola de diciembre', description: 'Registro de compras, revisión de facturas, tickets y sorteo opcional.',
 };
 
 export default function RootLayout({
