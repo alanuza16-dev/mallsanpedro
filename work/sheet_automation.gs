@@ -84,7 +84,7 @@ function recalcularCoincidencias_(sheet) {
 
   records.forEach(function(r) {
     const duplicateCount = counts[r.key];
-    const currentStatus = review['Estado revisión'] >= 0 ? String(values[r.row - 2][review['Estado revisión']] || '') : '';
+    const currentStatus = review['Estado revisión'] >= 0 ? String(values[r.row - 1][review['Estado revisión']] || '') : '';
     const status = duplicateCount > 1 ? (currentStatus === 'Aprobada' || currentStatus === 'Rechazada' ? currentStatus : 'Pendiente · coincidencia') : (currentStatus === 'Rechazada' ? currentStatus : 'Aprobada');
     const reason = duplicateCount > 1 ? 'Hay ' + duplicateCount + ' envíos con la misma clave; revisar todos antes de aprobar.' : 'Aprobación automática: no se detectaron coincidencias.';
     const internalCode = status === 'Aprobada' ? (duplicateCount > 1 ? 'APPROVED' : 'AUTO_OK') : status === 'Rechazada' ? 'REJECTED' : 'REVIEW_DUP';
