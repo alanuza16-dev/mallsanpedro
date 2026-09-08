@@ -84,8 +84,8 @@ function recalcularCoincidencias_(sheet) {
 
   records.forEach(function(r) {
     const duplicateCount = counts[r.key];
-    const status = duplicateCount > 1 ? 'Pendiente · coincidencia' : 'Pendiente';
-    const reason = duplicateCount > 1 ? 'Hay ' + duplicateCount + ' envíos con la misma clave; revisar todos antes de aprobar.' : 'Pendiente de contraste del comprobante.';
+    const status = duplicateCount > 1 ? 'Pendiente · coincidencia' : 'Aprobada';
+    const reason = duplicateCount > 1 ? 'Hay ' + duplicateCount + ' envíos con la misma clave; revisar todos antes de aprobar.' : 'Aprobación automática: no se detectaron coincidencias.';
     const rowValues = [];
     rowValues[review['Clave factura']] = r.key;
     rowValues[review['Coincidencias']] = duplicateCount;
@@ -131,5 +131,4 @@ function cargarCatalogo_() {
 function normalizar_(value) {
   return String(value == null ? '' : value).normalize('NFKC').trim().toUpperCase().replace(/[\s-]+/g, '');
 }
-
 
