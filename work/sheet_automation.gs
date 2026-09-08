@@ -14,7 +14,7 @@ const TOMBOLA_CONFIG = {
     invoice: ['Identificador completo de factura', 'Factura', 'Número de factura'],
     amount: ['Monto en colones', 'Monto', 'Importe', 'Monto de la factura en colones', 'Monto de compra en colones'],
   },
-  reviewHeaders: ['Clave factura', 'Coincidencias', 'Multiplicador', 'Tickets calculados', 'Estado revisión', 'Motivo revisión', 'Responsable', 'Fecha revisión'],
+  reviewHeaders: ['Clave factura', 'Coincidencias', 'Multiplicador', 'Tickets calculados', 'Estado revisión', 'Motivo revisión', 'Responsable', 'Fecha revisión', 'Código interno'],
 };
 
 /**
@@ -84,8 +84,10 @@ function recalcularCoincidencias_(sheet) {
 
   records.forEach(function(r) {
     const duplicateCount = counts[r.key];
-    const status = duplicateCount > 1 ? 'Pendiente · coincidencia' : 'Aprobada';
+    const currentStatus = review['Estado revisión'] >= 0 ? String(values[r.row - 2][review['Estado revisión']] || '') : '';
+    const status = duplicateCount > 1 ? (currentStatus === 'Aprobada' || currentStatus === 'Rechazada' ? currentStatus : 'Pendiente · coincidencia') : (currentStatus === 'Rechazada' ? currentStatus : 'Aprobada');
     const reason = duplicateCount > 1 ? 'Hay ' + duplicateCount + ' envíos con la misma clave; revisar todos antes de aprobar.' : 'Aprobación automática: no se detectaron coincidencias.';
+    const internalCode = status === 'Aprobada' ? (duplicateCount > 1 ? 'APPROVED' : 'AUTO_OK') : status === 'Rechazada' ? 'REJECTED' : 'REVIEW_DUP';
     const rowValues = [];
     rowValues[review['Clave factura']] = r.key;
     rowValues[review['Coincidencias']] = duplicateCount;
@@ -95,6 +97,7 @@ function recalcularCoincidencias_(sheet) {
     rowValues[review['Motivo revisión']] = reason;
     rowValues[review['Responsable']] = '';
     rowValues[review['Fecha revisión']] = '';
+    rowValues[review['Código interno']] = internalCode;
     Object.keys(review).forEach(function(h) {
       if (review[h] >= 0) sheet.getRange(r.row, review[h] + 1).setValue(rowValues[review[h]] || '');
     });
