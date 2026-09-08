@@ -18,11 +18,12 @@ Las comprobaciones de frontera son ₡9.000 → 0/0, ₡10.000 → 1/2, ₡25.00
 
 El formulario real ya está vinculado a la hoja privada de respuestas del organizador. Forms no valida unicidad contra envíos previos. La foto nativa exige que la persona inicie sesión en Google. Las coincidencias deben detectarse y revisarse después del envío; no se debe aprobar automáticamente la primera coincidencia.
 
-`work/Tombola_Diciembre_DEMO.xlsx` contiene la estructura inicial de la hoja: Inicio, Catálogo, Ejemplos, Revisión, Tickets e Historial. Puede importarse como hoja nativa y proteger las columnas calculadas/revisión. `work/sheet_automation.gs` prepara la hoja después de cada envío: calcula coincidencias, multiplicador y tickets, y deja las coincidencias pendientes para aprobación manual. Para activarlo, pegarlo en Extensiones → Apps Script de la hoja y ejecutar `instalarTrigger()` una vez. La vista web todavía no lee directamente la hoja; esa lectura requiere publicar una integración autenticada adicional.
+`work/Tombola_Diciembre_DEMO.xlsx` contiene la estructura inicial de la hoja: Inicio, Catálogo, Ejemplos, Revisión, Tickets e Historial. Puede importarse como hoja nativa y proteger las columnas calculadas/revisión. `work/sheet_automation.gs` prepara la hoja después de cada envío: calcula coincidencias, multiplicador y tickets, y deja las coincidencias pendientes para aprobación manual. Para activarlo, pegarlo en Extensiones → Apps Script de la hoja, ejecutar `instalarTrigger()` una vez y publicar el proyecto como aplicación web con acceso para la cuenta que usará la interfaz. La función `doGet()` entrega las filas de revisión; ese URL `/exec` debe configurarse en la página para que la pestaña se actualice después de cada envío.
 
 El sorteo opcional es un alcance separado. La demo no es certificación legal ni sorteo oficial.
 
 ## Costos
 
 15–22 horas y el ejemplo ₡240.000 de costo / ₡350.000 de venta son supuestos sujetos al documento de costos y a la compatibilidad real de Forms. El sorteo se cotiza aparte.
+
 

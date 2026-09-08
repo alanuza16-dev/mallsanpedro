@@ -9,20 +9,39 @@ const TOMBOLA_CONFIG = {
   responseSheetName: 'Respuestas de formulario 1',
   catalogSheetName: 'Catalogo',
   responseColumns: {
-    business: ['Negocio', 'Comercio', 'Negocio patrocinador'],
+    business: ['Negocio', 'Comercio', 'Negocio patrocinador', 'Identificador de negocio'],
     series: ['Serie / sucursal', 'Serie/sucursal', 'Serie'],
     invoice: ['Identificador completo de factura', 'Factura', 'Número de factura'],
-    amount: ['Monto en colones', 'Monto', 'Importe'],
+    amount: ['Monto en colones', 'Monto', 'Importe', 'Monto de la factura en colones', 'Monto de compra en colones'],
   },
   reviewHeaders: ['Clave factura', 'Coincidencias', 'Multiplicador', 'Tickets calculados', 'Estado revisión', 'Motivo revisión', 'Responsable', 'Fecha revisión'],
 };
 
+/**
+ * Devuelve las filas de revisión para que la interfaz pueda actualizarlas.
+ * Al publicar como aplicación web, usar el URL /exec en la interfaz.
+ */
+function doGet() {
+  const sheet = SpreadsheetApp.openById('1oPV7A6Coi4znauBRDx7pES4KHqNsk7qcEOStQpbpDIo').getSheetByName(TOMBOLA_CONFIG.responseSheetName) || SpreadsheetApp.getActiveSheet();
+  prepararHoja_(sheet);
+  recalcularCoincidencias_(sheet);
+  const values = sheet.getDataRange().getDisplayValues();
+  const headers = values.shift().map(String);
+  const rows = values.filter(function(row) { return row.some(function(cell) { return cell !== ''; }); }).map(function(row, i) {
+    const item = { row: i + 2 };
+    headers.forEach(function(header, col) { item[header] = row[col] || ''; });
+    return item;
+  });
+  return ContentService.createTextOutput(JSON.stringify({ updatedAt: new Date().toISOString(), rows: rows }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 function instalarTrigger() {
-  const ss = SpreadsheetApp.getActive();
+  const ss = SpreadsheetApp.openById('1oPV7A6Coi4znauBRDx7pES4KHqNsk7qcEOStQpbpDIo');
   ScriptApp.getProjectTriggers().forEach(function(trigger) {
     if (trigger.getHandlerFunction() === 'onFormSubmit') ScriptApp.deleteTrigger(trigger);
   });
-  ScriptApp.newTrigger('onFormSubmit').forSpreadsheet(ss).onFormSubmit().create();
+  ScriptApp.newTrigger('onFormSubmit').forSpreadsheet('1oPV7A6Coi4znauBRDx7pES4KHqNsk7qcEOStQpbpDIo').onFormSubmit().create();
   prepararHoja_(ss.getSheetByName(TOMBOLA_CONFIG.responseSheetName) || ss.getActiveSheet());
 }
 
@@ -83,7 +102,7 @@ function recalcularCoincidencias_(sheet) {
 }
 
 function marcarAprobada() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(TOMBOLA_CONFIG.responseSheetName);
+  const sheet = SpreadsheetApp.openById('1oPV7A6Coi4znauBRDx7pES4KHqNsk7qcEOStQpbpDIo').getSheetByName(TOMBOLA_CONFIG.responseSheetName);
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
   const statusCol = headers.indexOf('Estado revisión') + 1;
   const ownerCol = headers.indexOf('Responsable') + 1;
@@ -97,7 +116,7 @@ function marcarAprobada() {
 }
 
 function cargarCatalogo_() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(TOMBOLA_CONFIG.catalogSheetName);
+  const sheet = SpreadsheetApp.openById('1oPV7A6Coi4znauBRDx7pES4KHqNsk7qcEOStQpbpDIo').getSheetByName(TOMBOLA_CONFIG.catalogSheetName);
   if (!sheet || sheet.getLastRow() < 2) return {};
   const rows = sheet.getDataRange().getValues();
   const headers = rows.shift().map(String);
@@ -112,3 +131,4 @@ function cargarCatalogo_() {
 function normalizar_(value) {
   return String(value == null ? '' : value).normalize('NFKC').trim().toUpperCase().replace(/[\s-]+/g, '');
 }
+
