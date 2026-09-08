@@ -132,3 +132,4 @@ function normalizar_(value) {
   return String(value == null ? '' : value).normalize('NFKC').trim().toUpperCase().replace(/[\s-]+/g, '');
 }
 
+
