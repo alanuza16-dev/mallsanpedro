@@ -1,0 +1,12 @@
+{
+  "name": "tombola-diciembre-cloudflare",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix work/site ci && npm --prefix work/site run build",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.92.0"
+  }
+}
+
