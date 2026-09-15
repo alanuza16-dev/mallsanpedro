@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --color-noche: #0b1d33;
+  --color-noche-2: #112a47;
+  --color-noche-3: #1a3a5e;
+  --color-oro: #d9b44a;
+  --color-oro-suave: #f1dfa6;
+  --color-crema: #f7f3ea;
+  --color-pino: #2f7a5f;
+  --color-cereza: #c2463d;
+  --color-niebla: #9fb3c8;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --animate-titilar: titilar 3.2s ease-in-out infinite;
+  --animate-flotar: flotar 6s ease-in-out infinite;
+
+  @keyframes titilar {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-noche);
+  color: var(--color-crema);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Panel admin en claro para lectura prolongada. */
+.tema-claro {
+  color-scheme: light;
+  background: #f5f6f8;
+  color: #0b1d33;
+}
+
+::selection {
+  background: var(--color-oro);
+  color: var(--color-noche);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-oro);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .campo {
+    @apply w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3.5 text-base text-crema placeholder:text-niebla/60 transition focus:border-oro focus:bg-white/10 focus:outline-none;
+  }
+  .campo-claro {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-noche placeholder:text-slate-400 focus:border-noche focus:outline-none focus:ring-2 focus:ring-noche/15;
+  }
+  .etiqueta {
+    @apply mb-1.5 block text-sm font-semibold text-crema/90;
+  }
+  .boton {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-oro px-7 font-bold text-noche shadow-[0_8px_30px_-10px_rgba(217,180,74,0.7)] transition hover:bg-oro-suave active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .boton-sec {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 px-6 font-semibold text-crema transition hover:border-oro hover:text-oro;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-noche px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-noche-3 disabled:opacity-50;
+  }
+  .btn-sec {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-noche transition hover:bg-slate-50 disabled:opacity-50;
+  }
+  .tarjeta {
+    @apply rounded-2xl border border-white/10 bg-noche-2/70 backdrop-blur-md;
+  }
+  .panel {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

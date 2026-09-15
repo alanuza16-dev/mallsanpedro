@@ -1,29 +1,78 @@
-# Tómbola de diciembre
+# Góndola de Fin de Año · Mall San Pedro
 
-Demo privada, navegable y apta para celulares con datos completamente ficticios. Incluye registro en memoria, revisión manual, detección de duplicados, asignación idempotente por rangos, exportación de historial y un módulo opcional de sorteo.
+Sitio del Sorteo de Fin de Año: los clientes registran sus facturas de compra con foto, reciben boletos al instante
+y el mall administra todo desde un panel (anulaciones, tiendas, sorteo y exportación a Excel).
 
-## Demo
+Stack: Next.js 16 en Vercel, Postgres en Neon, fotos en Vercel Blob (privado), correo con Resend y WhatsApp con la
+API oficial de Meta.
 
-La aplicación se encuentra en `work/site`. Ejecutar `npm install` y `npm run dev` dentro de esa carpeta. La vista de revisión usa ejemplos en memoria; el formulario real está vinculado a una hoja privada de respuestas.
+## Reglas del sorteo
 
-Escenario precargado: cuatro facturas, incluida una persona con dos facturas distintas. Aprobarlas y asignar el lote produce 11 tickets: 2 + 8 + 1 + 0. Repetir la asignación no agrega rangos. El sorteo solo se habilita al cerrar recepción, completar revisión, asignar y congelar el padrón.
+- Por cada bloque completo de ₡10 000 en una factura se da **1 boleto**; en tiendas **patrocinadoras, 2 (x2)**.
+- Una factura no se puede repetir **en la misma tienda** (restricción única `tienda_id + numero_factura` en la base de
+  datos). Si se repite, el registro se rechaza al instante y la foto subida se borra.
+- Si no es duplicada, la factura queda válida y los boletos se asignan y notifican en el momento.
+- Desde el panel se puede anular una factura después (sus boletos quedan marcados como anulados y salen del sorteo) o
+  restaurarla.
+- Si la cédula ya existe, se conservan su correo y teléfono originales, para que nadie pueda desviar las
+  notificaciones de otra persona.
 
-## Reglas verificadas
+## Estructura
 
-Cada factura se calcula por separado con `floor(monto / 10000) × multiplicador`. Se conservan ceros iniciales y la clave de duplicidad combina negocio, serie/sucursal e identificador completo. Todas las coincidencias quedan retenidas. Los rangos ya emitidos conservan su huella; una anulación los excluye sin reutilizar números. El sorteo elige un ticket entre todos los números válidos con Web Crypto y muestreo por rechazo.
+```
+db/schema.sql            Esquema completo (idempotente)
+db/seed.sql              Tiendas iniciales (5 patrocinadoras x2 y 5 participantes)
+scripts/                 Migración y creación de administradores
+src/app/page.tsx         Landing con animación de nieve y luces
+src/app/participar/      Formulario en 3 pasos con cámara
+src/app/mis-boletos/     Consulta pública por cédula + correo
+src/app/admin/           Panel: facturas, detalle con foto, tiendas, sorteo y ajustes
+src/app/api/upload/      Tokens de subida directa a Vercel Blob
+src/app/api/admin/       Foto privada y exportación a Excel
+src/lib/                 Base de datos, sesión, almacenamiento, notificaciones y validaciones
+```
 
-Las comprobaciones de frontera son ₡9.000 → 0/0, ₡10.000 → 1/2, ₡25.000 → 2/4 y ₡40.000 → 4/8.
+## Puesta en marcha
 
-## Google Forms + Sheets
+```bash
+npm install
+cp .env.example .env.local        # completar DATABASE_URL y AUTH_SECRET
+npm run db:migrate -- --seed      # crea tablas y tiendas
+npm run admin:create -- correo@dominio.com "contraseña-segura" "Nombre"
+npm run dev
+```
 
-El formulario real ya está vinculado a la hoja privada de respuestas del organizador. Forms no valida unicidad contra envíos previos. La foto nativa exige que la persona inicie sesión en Google. Las coincidencias deben detectarse y revisarse después del envío; no se debe aprobar automáticamente la primera coincidencia.
+## Despliegue en Vercel
 
-`work/Tombola_Diciembre_DEMO.xlsx` contiene la estructura inicial de la hoja: Inicio, Catálogo, Ejemplos, Revisión, Tickets e Historial. Puede importarse como hoja nativa y proteger las columnas calculadas/revisión. `work/sheet_automation.gs` prepara la hoja después de cada envío: calcula coincidencias, multiplicador y tickets, y deja las coincidencias pendientes para aprobación manual. Para activarlo, pegarlo en Extensiones → Apps Script de la hoja, ejecutar `instalarTrigger()` una vez y publicar el proyecto como aplicación web con acceso para la cuenta que usará la interfaz. La función `doGet()` entrega las filas de revisión; ese URL `/exec` debe configurarse en la página para que la pestaña se actualice después de cada envío.
+1. Importar el repositorio en Vercel (framework Next.js, sin cambios de build).
+2. En **Storage**, crear un **Blob Store** y conectarlo al proyecto (crea `BLOB_READ_WRITE_TOKEN`).
+3. Agregar `DATABASE_URL`, `AUTH_SECRET` y `NEXT_PUBLIC_SITE_URL` en Environment Variables.
+4. Opcional: `RESEND_API_KEY` + `EMAIL_FROM` para correo; variables `WHATSAPP_*` para WhatsApp.
+5. Desplegar. El panel queda en `/admin`.
 
-El sorteo opcional es un alcance separado. La demo no es certificación legal ni sorteo oficial.
+### WhatsApp
 
-## Costos
+Meta exige plantillas aprobadas para mensajes que la empresa inicia. Crear en WhatsApp Manager una plantilla de
+categoría **Utility**, idioma español, con este cuerpo (o similar):
 
-15–22 horas y el ejemplo ₡240.000 de costo / ₡350.000 de venta son supuestos sujetos al documento de costos y a la compatibilidad real de Forms. El sorteo se cotiza aparte.
+> Hola {{1}}, registramos tu factura de {{2}} en el Sorteo de Fin de Año de Mall San Pedro. Tus boletos son: {{3}}. ¡Mucha suerte!
 
+Su nombre va en `WHATSAPP_TEMPLATE_BOLETOS`. Mientras no esté configurado, el sistema funciona igual y registra el
+aviso como "omitido".
 
+## Scripts
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run typecheck` | Revisión de tipos |
+| `npm run db:migrate` | Aplica `db/schema.sql` (agrega `-- --seed` para tiendas) |
+| `npm run admin:create` | Crea o actualiza un administrador |
+
+## Pendiente antes del lanzamiento
+
+- Revisión legal del texto de `/privacidad` (Ley 8968) y del reglamento del sorteo.
+- Confirmar con el mall la lista real de tiendas y cuáles son patrocinadoras (se edita en `/admin/tiendas`).
+- Definir fechas de la promoción en `/admin/ajustes`.
+- Logo oficial del mall.
