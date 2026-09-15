@@ -8,7 +8,10 @@ const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 /** Solo para desarrollo local sin Vercel Blob: guarda la foto en .uploads/. */
 export async function POST(request: Request) {
   if (blobEnabled() || process.env.VERCEL) {
-    return NextResponse.json({ error: "No disponible" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Almacenamiento de fotos no configurado: falta BLOB_READ_WRITE_TOKEN en Vercel" },
+      { status: 503 },
+    );
   }
   const form = await request.formData();
   const file = form.get("file");

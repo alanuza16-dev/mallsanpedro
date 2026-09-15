@@ -126,7 +126,10 @@ export default function Formulario({ tiendas, montoPorBloque, blob, whatsapp, co
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload-local", { method: "POST", body: fd });
-    if (!res.ok) throw new Error("upload");
+    if (!res.ok) {
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(cuerpo?.error ?? `Error ${res.status} al subir (almacenamiento no configurado)`);
+    }
     setProgreso(100);
     return (await res.json()) as { pathname: string; url: string };
   }
@@ -137,7 +140,15 @@ export default function Formulario({ tiendas, montoPorBloque, blob, whatsapp, co
     setProgreso(0);
     try {
       setCargando("Subiendo foto…");
-      const subida = await subirFoto(foto);
+      let subida: { pathname: string; url: string };
+      try {
+        subida = await subirFoto(foto);
+      } catch (e) {
+        console.error("Error al subir la foto", e);
+        const detalle = e instanceof Error ? e.message : String(e);
+        setError(`No pudimos subir la foto. Intenta de nuevo en unos minutos. (Detalle: ${detalle.slice(0, 140)})`);
+        return;
+      }
       setCargando("Registrando tus boletos…");
       const r = await registrarFactura({
         nombre,
@@ -164,7 +175,8 @@ export default function Formulario({ tiendas, montoPorBloque, blob, whatsapp, co
       setResultado(r);
       setPaso(3);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {
+    } catch (e) {
+      console.error("Error al registrar la factura", e);
       setError("Hubo un problema con la conexión. Intenta de nuevo.");
     } finally {
       setCargando(null);
