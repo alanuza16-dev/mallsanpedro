@@ -11,7 +11,8 @@ import { Pool } from "pg";
 
 type Row = Record<string, unknown>;
 
-const url = process.env.DATABASE_URL;
+// Se limpia por si el valor se pegó con espacios o saltos de línea en Vercel.
+const url = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "");
 
 function isLocal(connectionString: string) {
   try {

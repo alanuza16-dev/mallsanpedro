@@ -283,35 +283,57 @@ export default function Formulario({ tiendas, montoPorBloque, blob, whatsapp, co
               }}
               className="space-y-6"
             >
-              <fieldset>
-                <legend className="etiqueta">¿Dónde compraste?</legend>
-                <div className="grid max-h-[22rem] grid-cols-2 gap-2 overflow-y-auto pr-1">
-                  {ordenadas.map((t) => {
-                    const activa = t.id === tiendaId;
-                    return (
-                      <button
-                        type="button"
-                        key={t.id}
-                        onClick={() => setTiendaId(t.id)}
-                        aria-pressed={activa}
-                        className={`relative min-h-16 rounded-xl border p-3 text-left transition ${
-                          activa
-                            ? "border-oro bg-oro/15 ring-1 ring-oro"
-                            : t.patrocinadora
-                              ? "border-oro/30 bg-oro/[0.05] hover:border-oro/70"
-                              : "border-white/12 bg-white/[0.03] hover:border-white/35"
-                        }`}
-                      >
-                        {t.patrocinadora && (
-                          <span className="absolute right-2 top-2 rounded-full bg-oro px-1.5 text-[10px] font-extrabold text-noche">x2</span>
-                        )}
-                        <span className="block pr-7 text-sm font-bold leading-tight">{t.nombre}</span>
-                        <span className="mt-0.5 block text-xs text-niebla">{t.categoria}</span>
-                      </button>
-                    );
-                  })}
+              <div>
+                <label className="etiqueta" htmlFor="tienda">
+                  ¿Dónde compraste?
+                </label>
+                <div className="relative">
+                  <select
+                    id="tienda"
+                    className="campo appearance-none pr-12"
+                    value={tiendaId ?? ""}
+                    onChange={(e) => setTiendaId(e.target.value ? Number(e.target.value) : null)}
+                  >
+                    <option value="" disabled className="bg-noche text-niebla">
+                      Selecciona la tienda
+                    </option>
+                    <optgroup label="Patrocinadoras: doble boleto (x2)" className="bg-noche text-oro">
+                      {ordenadas
+                        .filter((t) => t.patrocinadora)
+                        .map((t) => (
+                          <option key={t.id} value={t.id} className="bg-noche text-crema">
+                            {t.nombre} (x2)
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="Participantes" className="bg-noche text-niebla">
+                      {ordenadas
+                        .filter((t) => !t.patrocinadora)
+                        .map((t) => (
+                          <option key={t.id} value={t.id} className="bg-noche text-crema">
+                            {t.nombre}
+                          </option>
+                        ))}
+                    </optgroup>
+                  </select>
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-oro"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z" />
+                  </svg>
                 </div>
-              </fieldset>
+                {tienda && (
+                  <p className="mt-2 flex items-center gap-2 text-sm text-niebla">
+                    {tienda.patrocinadora && (
+                      <span className="rounded-full bg-oro px-2 text-xs font-extrabold text-noche">x2</span>
+                    )}
+                    {tienda.categoria}
+                  </p>
+                )}
+              </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
